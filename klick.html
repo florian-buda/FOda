@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Klicker Spiel</title>
+  <style>
+    body {
+      margin: 0;
+      background: #222;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    #scoreDisplay {
+      position: absolute;
+      top: 10px;
+      right: 10px; /* <- HIER geändert: rechts statt links */
+      font-size: 24px;
+      color: #0f0;
+    }
+
+    #clickButton {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 150px;
+      height: 150px;
+      background-color: gold;
+      border: none;
+      border-radius: 50%;
+      font-size: 24px;
+      font-weight: bold;
+      color: #222;
+      cursor: pointer;
+      box-shadow: 0 0 15px 5px gold;
+      transition: transform 0.1s;
+    }
+
+    #clickButton:active {
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+
+    .coin {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: fall linear forwards;
+    }
+
+    @keyframes fall {
+      from {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(100vh) rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="scoreDisplay">$0</div>
+  <button id="clickButton">BUTTON</button>
+
+  <script>
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const button = document.getElementById('clickButton');
+    let score = 0;
+
+    button.addEventListener('click', () => {
+      score += 100;
+      scoreDisplay.textContent = `$${score}`;
+      spawnCoins(10); // Anzahl der fallenden Münzen
+    });
+
+    function spawnCoins(amount) {
+      for (let i = 0; i < amount; i++) {
+        const coin = document.createElement('div');
+        coin.classList.add('coin');
+
+        // Zufällige Startposition um den Button herum
+        const startX = window.innerWidth / 2 + (Math.random() - 0.5) * 100;
+        const startY = window.innerHeight / 2;
+
+        coin.style.left = `${startX}px`;
+        coin.style.top = `${startY}px`;
+
+        // Zufällige Fall-Dauer
+        const duration = 1 + Math.random() * 1.5;
+        coin.style.animationDuration = `${duration}s`;
+
+        document.body.appendChild(coin);
+
+        // Nach Animation entfernen
+        setTimeout(() => {
+          coin.remove();
+        }, duration * 1000);
+      }
+    }
+  </script>
+
+<a href="index.html">Zurück</a>
+</body>
+</html>
