@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>FLOda</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: #222;
+    }
+
+    #controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      border: none;
+      border-radius: 10px;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #666;
+    }
+
+    #pauseBtn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 20px;
+      width: 60px;
+      height: 40px;
+      background-color: #c00;
+    }
+
+    #restartBtn {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 20px;
+      background-color: #08c;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #restartBtn:hover {
+      background-color: #0af;
+    }
+
+    #gameOverText {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      color: red;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="pauseBtn">⏸</button>
+  <button id="restartBtn">Neustart</button>
+  <div id="gameOverText">Game Over</div>
+  <canvas id="gameCanvas" width="600" height="400"></canvas>
+
+  <div id="controls">
+    <div><button onclick="move('up')">⬆️</button></div>
+    <div class="row">
+      <button onclick="move('left')">⬅️</button>
+      <button onclick="move('down')">⬇️</button>
+      <button onclick="move('right')">➡️</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let player, item, direction, paused, gameOver;
+    const speed = 2;
+
+    const restartBtn = document.getElementById("restartBtn");
+    const gameOverText = document.getElementById("gameOverText");
+
+    function initGame() {
+      player = { x: 300, y: 200, size: 20, color: "blue" };
+      item = randomItem();
+      direction = { x: 0, y: 0 };
+      paused = false;
+      gameOver = false;
+      restartBtn.style.display = "none";
+      gameOverText.style.display = "none";
+    }
+
+    document.getElementById("pauseBtn").addEventListener("click", () => {
+      if (gameOver) return;
+      paused = !paused;
+      document.getElementById("pauseBtn").textContent = paused ? "▶️" : "⏸";
+    });
+
+    restartBtn.addEventListener("click", () => {
+      initGame();
+    });
+
+    function move(dir) {
+      if (gameOver) return;
+      switch (dir) {
+        case 'up': direction = { x: 0, y: -speed }; break;
+        case 'down': direction = { x: 0, y: speed }; break;
+        case 'left': direction = { x: -speed, y: 0 }; break;
+        case 'right': direction = { x: speed, y: 0 }; break;
+      }
+    }
+
+    function randomItem() {
+      const margin = 20;
+      const x = Math.random() * (canvas.width - margin * 2) + margin;
+      const y = Math.random() * (canvas.height - margin * 2) + margin;
+      return { x, y, size: 15, color: "red" };
+    }
+
+    function drawCircle(obj) {
+      ctx.fillStyle = obj.color;
+      ctx.beginPath();
+      ctx.arc(obj.x, obj.y, obj.size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function checkCollision() {
+      const dx = player.x - item.x;
+      const dy = player.y - item.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      return dist < (player.size + item.size) / 2;
+    }
+
+    function checkBounds() {
+      return (
+        player.x < 0 || player.x > canvas.width ||
+        player.y < 0 || player.y > canvas.height
+      );
+    }
+
+    function endGame() {
+      paused = true;
+      gameOver = true;
+      restartBtn.style.display = "block";
+      gameOverText.style.display = "block";
+    }
+
+    function gameLoop() {
+      if (!paused && !gameOver) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        player.x += direction.x;
+        player.y += direction.y;
+
+        if (checkBounds()) {
+          endGame();
+        }
+
+        if (checkCollision()) {
+          item = randomItem();
+        }
+
+        drawCircle(item);
+        drawCircle(player);
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    initGame();
+    gameLoop();
+  </script>
+  
+  <a href="index.html">Zurück</a>
+</body>
+</html>
